@@ -8,7 +8,6 @@ on:
 
 env:
   IMAGE_NAME: webhook.rb
-  DOCKER_TARGET_PLATFORM: linux/arm/v7
 
 jobs:
 
@@ -22,11 +21,7 @@ jobs:
       run: docker buildx ls
     - name: Buildx image
       run: |
-        docker buildx build . \
-        --file Dockerfile \
-        --tag $IMAGE_NAME \
-        --label "runnumber=${GITHUB_RUN_ID}" \
-        --platform linux/amd64, linux/arm64,linux/arm/v7
+        docker buildx build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/amd64, linux/arm64,linux/arm/v7
     - name: Log in to registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
     - name: Push image
