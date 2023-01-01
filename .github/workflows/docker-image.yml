@@ -27,15 +27,12 @@ jobs:
     - name: Log in to registry
       # This is where you will update the personal access token to GITHUB_TOKEN
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-    - name: Buildx
-      run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/arm/v7,linux/arm64,linux/amd64 --output type=docker .
-
-    # - name: Buildx linux/amd64
-    #   run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/amd64 --output type=docker .
-    # - name: Buildx linux/arm64
-    #   run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/arm64 --output type=docker .
-    # - name: Buildx linux/arm/v7
-    #   run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/arm/v7 --output type=docker .
+    - name: Buildx linux/amd64
+      run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/amd64 --output type=docker .
+    - name: Buildx linux/arm64
+      run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/arm64 --output type=docker .
+    - name: Buildx linux/arm/v7
+      run: docker buildx build --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/arm/v7 --output type=docker .
     - name: List images
       run: docker images
     - name: Push image
