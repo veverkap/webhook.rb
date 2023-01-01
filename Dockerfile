@@ -7,7 +7,7 @@ ENV RACK_ENV production
 RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
-COPY . /code
+COPY . /usr/src/app
 
 RUN bundle install
 
