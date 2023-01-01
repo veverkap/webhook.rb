@@ -12,41 +12,35 @@ env:
 
 jobs:
 
-  docker-arm:
+  docker:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    # - name: Set up QEMU
-      # uses: docker/setup-qemu-action@v1
     - name: Create builders
       run: docker buildx create --name mybuilder --use
     - name: Check builders
       run: docker buildx ls
     - name: Buildx image
-      run: docker buildx build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}" --platform linux/arm64,linux/arm/v7
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build image
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+      run: |
+        docker buildx build . \
+        --file Dockerfile \
+        --tag $IMAGE_NAME \
+        --label "runnumber=${GITHUB_RUN_ID}" \
+        --platform linux/amd64, linux/arm64,linux/arm/v7
     - name: Log in to registry
-      # This is where you will update the personal access token to GITHUB_TOKEN
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
     - name: Push image
       run: |
         IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-
         # Change all uppercase to lowercase
         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
         # Strip git ref prefix from version
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
         # Strip "v" prefix from tag name
         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-        # Use Docker `latest` tag convention
-        [ "$VERSION" == "master" ] && VERSION=latest
         echo IMAGE_ID=$IMAGE_ID
         echo VERSION=$VERSION
         docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
+        docker tag $IMAGE_NAME $IMAGE_ID:latest
+        docker push $IMAGE_ID:latest
