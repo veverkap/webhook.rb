@@ -8,15 +8,16 @@ get "/" do
   json request.env.sort.to_h
 end
 
-post "/:service/" do
-  status, headers, body = call env.merge("PATH_INFO" => '/', "SERVICE" => params[:service])
-  [status, headers, body]
+post "*" do
+  response = process_request(request)
+  json response
 end
 
-post "/" do
-  puts request.env["SERVICE"]
+def process_request(request)
+  if params.has_key?("splat")
+    puts "splat"
+  end
   request_id = Rack::RequestId.current
-
   request.body.rewind  # in case someone already read it
   data = request.body.read
 
@@ -24,16 +25,16 @@ post "/" do
     data = JSON.parse(data)
 
     # write data to file
-    File.open("requests/#{request_id}.json", 'w') do |f|
-      f.write(JSON.pretty_generate(data))
-    end
+    # File.open("requests/#{request_id}.json", 'w') do |f|
+    #   f.write(JSON.pretty_generate(data))
+    # end
   end
   response = {
     accept: request.accept,
     env: environment(request.env),
     body: data
   }
-  json response
+  response
 end
 
 def environment(env)
